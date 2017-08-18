@@ -1,0 +1,12 @@
+  <p>
+    <%= form.label :description_date_from %><br>
+    <%= form.date_select :start_holliday, default: { year: @this_year} %>    
+  </p>
+ 
+  <p>
+    <%= form.label :reason %><br>
+    <%= form.text_field :reason %>
+  </p>
+  <input type="hidden"
+         name="year"
+         value="<%=@this_year%>">

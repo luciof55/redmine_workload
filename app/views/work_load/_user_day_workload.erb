@@ -1,0 +1,53 @@
+<%
+# Renders user workload.
+# Parameters:
+#  * t_height: Total height.
+#  * headers_height.
+#  * g_width: Area width
+#  * header_height
+#  * g_height: Area height
+%>
+<%
+  zoom = 1
+  @zoom.times { zoom = zoom * 2 }
+  zoom = zoom + 4
+  width =  zoom - 1
+  left = 0
+  height = header_height
+  top = headers_height + 1
+%>
+<% @workloadData.keys.each do |user| %>
+	<%
+		data = @workloadData[user]
+		totalWorkload = data[:total]
+	%>
+	<% totalWorkload.keys.each do |day| %>
+		<%
+			style = "top: #{top}px;"
+			style += "left:#{left}px;"
+			style += "width:#{width}px;"
+			style += "height:#{height}px;"
+			clss = "wl_users_workload"
+			if totalWorkload[day].nil?
+				content = '0.0'
+				clss << " nwday"
+			else
+				if totalWorkload[day][:holiday]
+					content = ''
+					clss << " nwday"
+				else
+					content = sprintf("%.1f", totalWorkload[day][:hours])
+					clss << " " + totalWorkload[day][:clss]
+				end
+			end
+		%>
+		<%= content_tag(:div, content.html_safe, :style => style, :class => clss) %>
+		<%
+			left = left + width + 1
+		%>
+	<% end %>
+	<%
+		top = top + height
+		left = 0
+	%>
+<% end %>

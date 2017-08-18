@@ -1,0 +1,65 @@
+<% html_title(l(:workload_site_title)) %>
+
+<div class="contextual">
+    <%= render_action_links %>
+</div>
+
+<h2><%= l(:workload_show_label) %></h2>
+
+<fieldset id="filters" class="collapsible collapsed">
+  <legend onclick="toggleFieldset(this);"><h3><%=l(:workload_title)%> <%=l(:workload_show_filters) %></h3></legend>
+  <div>
+    <%= render :partial => 'filters' %>
+  </div>
+</fieldset>
+
+<%= error_messages_for 'query' %>
+
+<%
+  user_width = 121
+  header_height = 19
+  headers_height = header_height
+  if @zoom > 2
+    headers_height = (@zoom - 1) * header_height
+  end
+
+  # Size of the entire chart
+  g_width = (@last_day - @first_day + 1).to_i
+  g_height = 0
+%>
+<% @workloadData.keys.each do |user| %>
+	<%
+		g_height += 19
+	%>
+<% end %>
+<%
+  t_height = g_height + headers_height
+%>
+
+<div class="wrapper">
+	<table style="width:100%; border:0; border-collapse: collapse;">
+		<tr>
+			<td style="padding:0px;width:<%= user_width %>px;">
+				<%= render :partial => 'users', :locals => {:t_height => t_height, :user_width => user_width, :headers_height => headers_height, :header_height => header_height} %>
+			</td>
+			<td style="padding:0px;">
+				<%
+					style = "position:relative;overflow:none;"
+					style += "height: #{t_height + 2}px;"
+				%>
+				<%= content_tag(:div, :style => style, :id => 'workload_area') do %>
+					<%= render :partial => 'headers', :locals => {:t_height => t_height, :headers_height => headers_height, :g_width => g_width, :header_height => header_height, :g_height => g_height} %>
+					<% if @zoom == 4 %>
+						<%= render :partial => 'user_day_workload', :locals => {:t_height => t_height, :headers_height => headers_height, :g_width => g_width, :header_height => header_height, :g_height => g_height} %>
+					<% end %>
+					<% if @zoom == 3 %>
+						<%= render :partial => 'user_week_workload', :locals => {:t_height => t_height, :headers_height => headers_height, :g_width => g_width, :header_height => header_height, :g_height => g_height} %>
+					<% end %>
+					<% if @zoom == 2 %>
+						<%= render :partial => 'user_month_workload', :locals => {:t_height => t_height, :headers_height => headers_height, :g_width => g_width, :header_height => header_height, :g_height => g_height} %>
+					<% end %>
+				<% end %>
+			</td>
+		</tr>
+	<table>
+</div>

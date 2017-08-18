@@ -1,0 +1,21 @@
+<%
+# Renders an accumulated workload.
+# Parameters:
+#  * totalWorkload: Hash that contains the total workload for each day.
+%>
+
+<% totalWorkload.keys.sort.each do |day| %>
+  <%
+     klass  = 'hours'
+     klass += ' holiday' if totalWorkload[day][:holiday]
+     klass += ' workingday' if !totalWorkload[day][:holiday]
+     klass += ' today'   if @today === day
+     klass += ' ' + ListUser::getLoadClassForHours(totalWorkload[day][:hours], user)
+  %>
+  <td class="<%= klass %>">
+      <span>
+        <%= sprintf("%.1f", totalWorkload[day][:hours]) %>
+      </span>
+  </td>
+<% end %>
+

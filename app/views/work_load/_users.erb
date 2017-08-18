@@ -1,0 +1,35 @@
+<%
+# Renders users.
+# Parameters:
+#  * t_height: Total height.
+#  * user_width: Div width, where users are displayed
+#  * headers_height.
+#  * header_height.
+%>
+<%
+    style = "position:relative;"
+    style += "height: #{t_height}px;"
+    style += "width: #{user_width - 1}px;"
+%>
+<%= content_tag(:div, :style => style, :class => 'wl_user_border') do %>
+	<%
+		style = "width: #{user_width - 1}px;"
+		style += "height: #{headers_height}px;"
+	%>
+	<%= content_tag(:div, "", :style => style, :class => 'wl_user_hdr') %>
+	
+	<%
+		style = "top: #{headers_height}px;"
+	%>
+    <%= content_tag(:div, :id => 'div_users_list', :style => style, :class => 'wl_users_list') do %>
+		<%
+			style = "height: #{header_height - 1}px;"
+		%>
+		<% @workloadData.keys.each do |user| %>			
+			<%= content_tag(:div, :style => style, :class => 'wl_user_line') do %>
+				<%= "#{user.firstname} #{user.lastname}" %>
+			<% end %>
+		<% end %>
+    <% end %>
+	
+<% end %>

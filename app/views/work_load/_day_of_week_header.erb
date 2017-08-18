@@ -1,0 +1,19 @@
+<%
+# Parameters:
+#  dayOfMonth: Any day of the month to render the header for.
+%>
+
+<% @timeSpanToDisplay.each do |currentDay|%>
+  <%
+    if (currentDay.cwday == 1) then
+      klass = ' firstDayOfWeek'
+    elsif (currentDay.cwday == 7) then
+      klass = ' lastDayOfWeek'
+    else
+      klass = ''
+    end
+  %>
+  <th class="day-of-week <%= klass %>" scope="col">
+    <%= day_name(currentDay.cwday).first %>
+  </th>
+<% end %>

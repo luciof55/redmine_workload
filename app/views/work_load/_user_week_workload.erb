@@ -1,0 +1,50 @@
+<%
+# Renders user workload.
+# Parameters:
+#  * t_height: Total height.
+#  * headers_height.
+#  * g_width: Area width
+#  * header_height
+#  * g_height: Area height
+%>
+<%
+  zoom = 1
+  @zoom.times { zoom = zoom * 2 }
+  zoom = zoom + 4
+  width =  zoom - 1
+  left = 0
+  height = header_height
+  top = headers_height + 1
+%>
+<% @workloadData.keys.each do |user| %>
+	<%
+		data = @workloadData[user]
+		totalWorkload = data[:total]
+		week_start = @first_day
+		week_end = @first_day + (7 - @first_day.cwday)
+	%>
+	<% totalWorkload.keys.each do |week| %>
+		<%
+			width = ((week_end <= @last_day) ? (week_end - week_start + 1) * zoom - 1 : (@last_day - week_start + 1) * zoom - 1).to_i
+			style = "left: #{left}px;"
+			style += "top: #{top}px;"
+			style += "width: #{width}px;"
+			style += "height: #{height}px;"
+			clss = "wl_users_workload " + totalWorkload[week][:clss]
+		%>
+		<%= content_tag(:div, '&nbsp;'.html_safe, :style => style, :class => clss) do %>
+			<%= content_tag(:small) do %>
+				<%= sprintf("%.1f", totalWorkload[week][:hours]) if width >= 16 %>
+			<% end %>
+		<% end %>
+		<%
+			left = left + width + 1
+			week_start = week_end + 1
+			week_end = week_start + 6
+		%>
+	<% end %>
+	<%
+		top = top + height
+		left = 0
+	%>
+<% end %>

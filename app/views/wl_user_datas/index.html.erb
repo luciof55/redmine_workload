@@ -1,0 +1,11 @@
+<div class="contextual">
+    <%= render_action_links %>
+</div>
+
+<h1><%= l(:workload_user_data_site_title)%></h1>
+
+<%= link_to l(:label_new), new_wl_user_data_path, :class => 'icon icon-add' if @is_allowed %>
+<p></p>
+<% unless @wl_users_data.empty?%>	
+	<%= render(partial: "show_list", locals: {wl_users_data: @wl_users_data, is_allowed: @is_allowed}) %>
+<%end%>

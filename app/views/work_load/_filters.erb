@@ -1,0 +1,31 @@
+<%= form_tag({:controller => 'work_load', :action => 'show', :month => params[:month],
+             :year => params[:year], :months => params[:months]}, {:method => :get, :id => 'filter_form', :class => 'filters'}) do %>
+	<%= hidden_field_tag 'zoom', @zoom %>
+	<div class="timespan">
+		<p class="buttons">
+		<%= text_field_tag 'months', @months, :size => 2 %>
+		<%= l(:workload_show_rangefrom) %> <%= select_month(@month_from, :prefix => "month", :discard_type => true) %>
+		<%= select_year(@year_from, :prefix => "year", :discard_type => true) %>
+		<%= l(:workload_show_today) %> <%= date_field_tag 'control_date', @today %>
+		<%= link_to_function l(:button_apply), 'jQuery("#filter_form").submit()', :class => 'apply icon icon-checked' %>	
+	</div>
+	<div class="groups" style="float: left">
+		<table>
+			<tr><td><%= label_tag :workload_groups, l(:workload_show_filter_group) %></td></tr>
+			<tr><td><%= select_tag :workload_groups, get_option_tags_for_groupselection(@groupsToDisplay, @selectedGroups), :name => 'workload[groups][]', :multiple => true, :onchange => "this.form.workload_users.selectedIndex=-1;" %></td></tr>
+		</table>
+    </div>
+	<div style="float: left"><span>&nbsp;&nbsp;</span></div>
+    <div class="users" style="float: left">
+		<table>
+			<tr><td><%= label_tag :workload_users, l(:workload_show_filter_user) %></td></tr>
+			<tr><td><%= select_tag :workload_users, get_option_tags_for_userselection(@usersAllowedToDisplay, @usersToDisplay), :name => 'workload[users][]', :multiple => true, :onchange => "this.form.workload_groups.selectedIndex=-1;" %></td></tr>
+		</table>
+    </div>
+	<div class="contextual">
+	  <%= wl_zoom_link(@zoom, :in) %>
+	  <%= wl_zoom_link(@zoom, :out) %>
+	</div>
+<%
+  end
+%>

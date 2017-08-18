@@ -1,0 +1,13 @@
+<% html_title(l(:workload_user_data_site_title)) %>
+
+<h2><%= l(:workload_user_vacation_edit) %></h2>
+
+<%= form_for @wl_user_vacation do |f| %>
+	<%= render(partial: "form", locals: {form: f, disabled: false}) %>
+	<div style = "float: none" class="splitcontentleft">
+		<p>
+			<%= f.submit l(:button_update)%>
+			<%= link_to l(:button_cancel), :controller => 'wl_user_vacations', :action => "index", :year => @this_year %>
+		</p>
+	</div>
+<% end %>

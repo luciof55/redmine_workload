@@ -1,0 +1,127 @@
+<%
+# Renders headers.
+# Parameters:
+#  * t_height: Total height.
+#  * headers_height.
+#  * g_width: Area width
+#  * header_height
+#  * g_height: Area height
+%>
+<%
+  monthsInTimespan = ListUser::getMonthsInTimespan(@timeSpanToDisplay)
+  zoom = 1
+  @zoom.times { zoom = zoom * 2 }
+  zoom = zoom + 4
+  if @zoom == 2
+	style = "width: #{monthsInTimespan.size * 121}px;"
+  else
+	style = "width: #{g_width * zoom - 1}px;"
+  end
+  style += "height: #{headers_height}px;"
+%>
+<%= content_tag(:div, '&nbsp;'.html_safe, :style => style, :class => "wl_background_hdr") %>
+
+<% ###### Months headers ###### %>
+<%
+  month_f = @first_day
+  left = 0
+  g_height = g_height + 2
+  height = header_height - 1
+  if @zoom == 2
+	height = height + g_height
+	width = 120
+  end
+%>
+
+<% monthsInTimespan.each do |month| %>
+  <%
+	if @zoom > 2
+		width = (((month_f >> 1) - month_f) * zoom - 1).to_i
+	end
+    style = "left: #{left}px;"
+    style += "width: #{width}px;"
+    style += "height: #{height}px;"
+	content = "<span>#{month_name(month_f.month)} #{month_f.year}</span>"
+  %>
+  <%= content_tag(:div, content.html_safe, :style => style, :class => "wl_title_hdr") %>
+  <%
+    left = left + width + 1
+    month_f = month_f >> 1
+  %>
+<% end %>
+
+<% ###### Weeks headers ###### %>
+<% if @show_weeks %>
+  <%
+    left = 0
+    height = header_height - 1
+	if @zoom == 3
+		height = height + g_height
+	end
+  %>
+  <% if @first_day.cwday == 1 %>
+    <%
+      # @first_day is monday
+      week_f = @first_day
+    %>
+  <% else %>
+    <%
+      # find next monday after @first_day
+      week_f = @first_day + (7 - @first_day.cwday + 1)
+      width = (7 - @first_day.cwday + 1) * zoom - 1
+      style = "left: #{left}px;"
+      style += "top: 19px;"
+      style += "width: #{width}px;"
+      style += "height: #{height}px;"
+    %>
+    <%= content_tag(:div, '&nbsp;'.html_safe, :style => style, :class => "wl_title_hdr") %>
+    <% left = left + width + 1 %>
+  <% end %>
+  <% while week_f <= @last_day %>
+    <%
+      width = ((week_f + 6 <= @last_day) ? 7 * zoom - 1 : (@last_day - week_f + 1) * zoom - 1).to_i
+      style = "left: #{left}px;"
+      style += "top: 19px;"
+      style += "width: #{width}px;"
+      style += "height: #{height}px;"
+    %>
+    <%= content_tag(:div, :style => style, :class => "wl_title_hdr") do %>
+      <%= content_tag(:small) do %>
+        <%= week_f.cweek if width >= 16 %>
+      <% end %>
+    <% end %>
+    <%
+      left = left + width + 1
+      week_f = week_f + 7
+    %>
+  <% end %>
+<% end %>
+
+<% ###### Day numbers headers ###### %>
+<% if @show_days %>
+  <%
+    left = 0
+    height = g_height + header_height - 1
+    wday = @first_day.cwday
+    day_num = @first_day
+  %>
+  <% (@last_day - @first_day + 1).to_i.times do %>
+    <%
+      width =  zoom - 1
+      style = "left:#{left}px;"
+      style += "top:37px;"
+      style += "width:#{width}px;"
+      style += "height:#{height}px;"
+      clss = "wl_title_hdr"
+      # clss << " nwday" if Redmine::Utils::DateCalculation::non_working_week_days.include?(wday)
+	  content = day_num.day.to_s
+    %>
+    <%= content_tag(:div, content.html_safe, :style => style, :class => clss)%>
+    <%
+     left = left + width+1
+     day_num = day_num + 1
+     wday = wday + 1
+     wday = 1 if wday > 7
+    %>
+  <% end %>
+<% end %> 

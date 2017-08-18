@@ -1,0 +1,52 @@
+<%
+# Renders user workload.
+# Parameters:
+#  * t_height: Total height.
+#  * headers_height.
+#  * g_width: Area width
+#  * header_height
+#  * g_height: Area height
+%>
+<%
+  zoom = 1
+  @zoom.times { zoom = zoom * 2 }
+  zoom = zoom + 4
+  left = 0
+  height = header_height
+  top = headers_height + 1
+  if @zoom == 2
+	width = 120
+  end
+%>
+<% @workloadData.keys.each do |user| %>
+	<%
+		data = @workloadData[user]
+		totalWorkload = data[:total]
+		month_f = @first_day
+	%>
+	<% totalWorkload.keys.each do |monthKey| %>
+		<%
+			style = "top: #{top}px;"
+			style += "left:#{left}px;"
+			if @zoom > 2
+				width = (((month_f >> 1) - month_f) * zoom - 1).to_i
+			end
+			style += "width:#{width}px;"
+			style += "height:#{height}px;"
+			clss = "wl_users_workload " + totalWorkload[monthKey][:clss]
+		%>
+		<%= content_tag(:div, '&nbsp;'.html_safe, :style => style, :class => clss) do %>
+			<%= content_tag(:small) do %>
+				<%= sprintf("%.1f", totalWorkload[monthKey][:hours]) %>
+			<% end %>
+		<% end %>
+		<%
+			left = left + width + 1
+			month_f = month_f >> 1
+		%>
+	<% end %>
+	<%
+		top = top + height
+		left = 0
+	%>
+<% end %>

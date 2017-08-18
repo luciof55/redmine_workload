@@ -1,0 +1,19 @@
+<% html_title(l(:workload_user_data_new)) %>
+
+<h2><%= l(:workload_user_data_edit) %></h2>
+
+<%= form_for @wl_user_data, :url => { :action => "update" } do |f| %>
+	<%= render(partial: "form", locals: {form: f, disabled: true}) %>
+	<div style = "float: none" class="splitcontentleft">
+		<p>
+			<% if @is_allowed %>
+				<%= f.submit l(:button_update)%>
+			<% end %>	
+			<%= link_to l(:button_cancel), :controller => 'wl_user_datas', :action => "index" %>
+		</p>
+	</div>
+<% end %>
+
+<% content_for :sidebar do %>
+	<%= render :partial => 'sidebar' %>
+<% end %>
