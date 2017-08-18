@@ -13,7 +13,7 @@ these issues will be ignored.
 
 1. To install it, simply clone it into the plugins-directory. Execute
 
-    git clone https://github.com/JostBaron/redmine_workload.git redmine_workload
+    git clone https://github.com/luciof55/redmine_workload redmine_workload
 
  in your plugins directory. 
 
@@ -57,10 +57,3 @@ National holidays and user vacation is counted as day off (like weekend).
 Admins can setup National Holidays in plugin-settings.
 Users can get permissions to setup their vacations and Workload Data with 'Roles and permissions'.  
 You can specify user(s), who should be able to setup national holidays with 'Roles and permissions'.
-
-
-#### ToDo
-
-* Improve performance - requests still take up to 5 seconds.
-* Add legend (again).
-* Use nicer colors for workload indications.
