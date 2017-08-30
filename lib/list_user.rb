@@ -16,7 +16,7 @@ class ListUser
   # Returns all issues that fulfill the following conditions:
   #  * They are open
   #  * The project they belong to is active
-  def self.getOpenIssuesForUsers(users)
+  def self.getOpenIssuesForUsers(users, exclude_closed)
     raise ArgumentError unless users.kind_of?(Array)
     userIDs = users.map(&:id)
 
@@ -24,14 +24,14 @@ class ListUser
     project = Project.arel_table
     issue_status = IssueStatus.arel_table
 
-    # Fetch all issues that ...
-    issues = Issue.joins(:project).
-                   joins(:status).
-                   joins(:assigned_to).
-                        where(issue[:assigned_to_id].in(userIDs)).      # Are assigned to one of the interesting users
-                        where(project[:status].eq(1)).                  # Do not belong to an inactive project
-                        where(issue_status[:is_closed].eq(false))       # Is open
-
+    
+    if exclude_closed
+		# Fetch only open issues 
+		issues = Issue.joins(:project).joins(:status).joins(:assigned_to).where(issue[:assigned_to_id].in(userIDs)).where(project[:status].eq(1)).where(issue_status[:is_closed].eq(false))       
+	else
+		# Fetch all issues
+		issues = Issue.joins(:project).joins(:assigned_to).where(issue[:assigned_to_id].in(userIDs)).where(project[:status].eq(1))
+	end
     #  Filter out all issues that have children; They do not *directly* add to
     # the workload
     return issues.select { |x| x.leaf? }
@@ -237,135 +237,124 @@ class ListUser
     return result
   end
   
-  def self.getHoursPerUserIssueAndMonth(issues, timeSpan, today, first_day, last_day, monthsToRender)
-    raise ArgumentError unless issues.kind_of?(Array)
-    raise ArgumentError unless timeSpan.kind_of?(Range)
-    raise ArgumentError unless today.kind_of?(Date)
-    result = {}
+	def self.getHoursPerUserIssueAndMonth(issues, timeSpan, today, first_day, last_day, monthsToRender)
+		raise ArgumentError unless issues.kind_of?(Array)
+		raise ArgumentError unless timeSpan.kind_of?(Range)
+		raise ArgumentError unless today.kind_of?(Date)
+		result = {}
 
-    issues.each do |issue|
-		assignee = issue.assigned_to
-		
-		if !result.has_key?(issue.assigned_to)
-			result[assignee] = {:overdue_hours => 0.0, :overdue_number => 0, :total => Hash::new, :invisible => Hash::new}
-			monthsToRender.each do |month|
-				result[assignee][:total][month] = {:hours => 0.0, :holiday => false, :clss => 'normal', :start_date => month[:first_day], :end_date => month[:last_day]}
-			end
-		end
+		issues.each do |issue|
+			assignee = issue.assigned_to
 			
-		hoursForIssue = getHoursForIssuesPerMonth(issue, timeSpan, today, first_day, last_day, monthsToRender)
-		hoursForIssue.keys.each do |monthKey|
-			result[assignee][:total][monthKey][:hours] += hoursForIssue[monthKey][:hours]
-		end
-    end
-	
-	#Mark workload (normal, lower, over).
-	result.keys.each do |assigneeKey|
-		result[assigneeKey][:total].keys.each do |monthKey|
-			timeSpan = result[assigneeKey][:total][monthKey][:start_date]..result[assigneeKey][:total][monthKey][:end_date]
-			days = DateTools::getRealDistanceInDays(timeSpan, assigneeKey.id)
-			user_workload_data = WlUserData.find_by user_id: assigneeKey.id
-			if user_workload_data
-				threshold_highload_min = user_workload_data.threshold_highload_min
-				threshold_lowload_min = user_workload_data.threshold_lowload_min
-			else
-				threshold_highload_min = Setting['plugin_redmine_workload']['threshold_highload_min'].to_f
-				threshold_lowload_min = Setting['plugin_redmine_workload']['threshold_lowload_min'].to_f
+			if !result.has_key?(issue.assigned_to)
+				result[assignee] = {:overdue_hours => 0.0, :overdue_number => 0, :total => Hash::new, :invisible => Hash::new}
+				monthsToRender.each do |month|
+					result[assignee][:total][month] = {:hours => 0.0, :holiday => false, :clss => 'normal', :start_date => month[:first_day], :end_date => month[:last_day]}
+				end
 			end
-			if result[assigneeKey][:total][monthKey][:hours] >  threshold_highload_min * days
-				result[assigneeKey][:total][monthKey][:clss] = 'over'
-			else
-				if result[assigneeKey][:total][monthKey][:hours] <  threshold_lowload_min * days
-					result[assigneeKey][:total][monthKey][:clss] = 'lower'
+				
+			hoursForIssue = getHoursForIssuesPerMonth(issue, timeSpan, today, first_day, last_day, monthsToRender)
+			hoursForIssue.keys.each do |monthKey|
+				result[assignee][:total][monthKey][:hours] += hoursForIssue[monthKey][:hours]
+			end
+		end
+
+		#Mark workload (normal, lower, over).
+		result.keys.each do |assigneeKey|
+			result[assigneeKey][:total].keys.each do |monthKey|
+				timeSpan = result[assigneeKey][:total][monthKey][:start_date]..result[assigneeKey][:total][monthKey][:end_date]
+				days = DateTools::getRealDistanceInDays(timeSpan, assigneeKey.id)
+				user_workload_data = WlUserData.find_by user_id: assigneeKey.id
+				if user_workload_data
+					threshold_highload_min = user_workload_data.threshold_highload_min
+					threshold_lowload_min = user_workload_data.threshold_lowload_min
+				else
+					threshold_highload_min = Setting['plugin_redmine_workload']['threshold_highload_min'].to_f
+					threshold_lowload_min = Setting['plugin_redmine_workload']['threshold_lowload_min'].to_f
+				end
+				if result[assigneeKey][:total][monthKey][:hours] >  threshold_highload_min * days
+					result[assigneeKey][:total][monthKey][:clss] = 'over'
+				else
+					if result[assigneeKey][:total][monthKey][:hours] <  threshold_lowload_min * days
+						result[assigneeKey][:total][monthKey][:clss] = 'lower'
+					end
 				end
 			end
 		end
+
+		return result
 	end
 
-    return result
-  end
+	# Returns an array with one entry for each month in the given time span.
+	# Each entry is a hash with two keys: :first_day and :last_day, having the
+	# first resp. last day of that month from the time span as value.
+	def self.getMonthsInTimespan(timeSpan)
+		raise ArgumentError unless timeSpan.kind_of?(Range)
+		# Abort if the given time span is empty.
+		return [] unless timeSpan.any?
+		firstOfCurrentMonth = timeSpan.first
+		lastOfCurrentMonth  = [firstOfCurrentMonth.end_of_month, timeSpan.last].min
+		result = []
+		while firstOfCurrentMonth <= timeSpan.last do
+			result.push({:first_day => firstOfCurrentMonth, :last_day  => lastOfCurrentMonth})
+			firstOfCurrentMonth = firstOfCurrentMonth.beginning_of_month.next_month
+			lastOfCurrentMonth  = [firstOfCurrentMonth.end_of_month, timeSpan.last].min
+		end
+		return result
+	end
 
-  # Returns an array with one entry for each month in the given time span.
-  # Each entry is a hash with two keys: :first_day and :last_day, having the
-  # first resp. last day of that month from the time span as value.
-  def self.getMonthsInTimespan(timeSpan)
-    raise ArgumentError unless timeSpan.kind_of?(Range)
-    # Abort if the given time span is empty.
-    return [] unless timeSpan.any?
-    firstOfCurrentMonth = timeSpan.first
-    lastOfCurrentMonth  = [firstOfCurrentMonth.end_of_month, timeSpan.last].min
-    result = []
-    while firstOfCurrentMonth <= timeSpan.last do
-      result.push({:first_day => firstOfCurrentMonth, :last_day  => lastOfCurrentMonth})
-      firstOfCurrentMonth = firstOfCurrentMonth.beginning_of_month.next_month
-      lastOfCurrentMonth  = [firstOfCurrentMonth.end_of_month, timeSpan.last].min
-    end
-    return result
-  end
+	# Returns the "load class" for a given amount of working hours on a single
+	# day.
+	def self.getLoadClassForHours(hours, user = nil)
+		raise ArgumentError unless hours.respond_to?(:to_f)
+		hours = hours.to_f
 
-  # Returns the "load class" for a given amount of working hours on a single
-  # day.
-  def self.getLoadClassForHours(hours, user = nil)
-    raise ArgumentError unless hours.respond_to?(:to_f)
-    hours = hours.to_f
-    
-    #load defaults:
-    lowLoad = Setting['plugin_redmine_workload']['threshold_lowload_min'].to_f
-    normalLoad = Setting['plugin_redmine_workload']['threshold_normalload_min'].to_f
-    highLoad = Setting['plugin_redmine_workload']['threshold_highload_min'].to_f
-    
-    if !user.nil?
-      user_workload_data = WlUserData.find_by user_id: user.id
-      if !user_workload_data.nil?
-        lowLoad     = user_workload_data.threshold_lowload_min
-        normalLoad  = user_workload_data.threshold_normalload_min
-        highLoad    = user_workload_data.threshold_highload_min
-      end
-    end
+		#load defaults:
+		lowLoad = Setting['plugin_redmine_workload']['threshold_lowload_min'].to_f
+		normalLoad = Setting['plugin_redmine_workload']['threshold_normalload_min'].to_f
+		highLoad = Setting['plugin_redmine_workload']['threshold_highload_min'].to_f
 
-    if hours < lowLoad then
-        return "none"
-    elsif hours < normalLoad then
-        return "low"
-    elsif hours < highLoad then
-        return "normal"
-    else
-        return "high"
-    end      
-    
+		if !user.nil?
+			user_workload_data = WlUserData.find_by user_id: user.id
+			if !user_workload_data.nil?
+				lowLoad     = user_workload_data.threshold_lowload_min
+				normalLoad  = user_workload_data.threshold_normalload_min
+				highLoad    = user_workload_data.threshold_highload_min
+			end
+		end
 
-  end
+		if hours < lowLoad then
+			return "none"
+		elsif hours < normalLoad then
+			return "low"
+		elsif hours < highLoad then
+			return "normal"
+		else
+			return "high"
+		end      
+	end
 
-  # Returns the list of all users the current user may display.
-  def self.getUsersAllowedToDisplay()
+	# Returns the list of all users the current user may display.
+	def self.getUsersAllowedToDisplay()
+		return [] if User.current.anonymous?
+		return User.active if User.current.admin?
+		result = [User.current]
+		# Get all projects where the current user has the :view_project_workload
+		# permission
+		projects = Project.allowed_to(:view_project_workload)
+		projects.each do |project|
+			result += project.members.map(&:user)
+		end
+		return result.uniq
+	end
 
-    return [] if User.current.anonymous?
-    return User.active if User.current.admin?
-
-    result = [User.current]
-
-    # Get all projects where the current user has the :view_project_workload
-    # permission
-    projects = Project.allowed_to(:view_project_workload)
-
-    projects.each do |project|
-      result += project.members.map(&:user)
-    end
-
-    return result.uniq
-  end
-
-  def self.getUsersOfGroups(groups)
-    result = []
-    
-    groups.each do |grp|
-      #result += grp.members.map(&:user) if grp.members.map(&:user).nil?
-      result += grp.users(&:users)
-    end
-    
-    
-    return result.uniq
-  end
+	def self.getUsersOfGroups(groups)
+		result = []
+		groups.each do |grp|
+			result += grp.users(&:users)
+		end
+		return result.uniq
+	end
 
 	def self.addIssueInfoToSummary(summary, issueInfo, timeSpan)
 		workingDays = DateTools::getWorkingDaysInTimespan(timeSpan)
@@ -378,7 +367,6 @@ class ListUser
 			Rails.logger.info("day: " + day.to_s + " hours: " + issueInfo[day][:hours].to_s)
 			summary[day][:hours] += issueInfo[day][:hours]
 		end
-
 		return summary
 	end
 end

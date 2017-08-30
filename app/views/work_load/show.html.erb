@@ -6,13 +6,25 @@
 
 <h2><%= l(:workload_show_label) %></h2>
 
-<fieldset id="filters" class="collapsible collapsed">
-  <legend onclick="toggleFieldset(this);"><h3><%=l(:workload_title)%> <%=l(:workload_show_filters) %></h3></legend>
-  <div>
-    <%= render :partial => 'filters' %>
-  </div>
-</fieldset>
-
+<%= form_tag({:controller => 'work_load', :action => 'show', :month => params[:month],
+             :year => params[:year], :months => params[:months]}, {:method => :get, :id => 'filter_form', :class => 'filters'}) do %>
+	<fieldset id="filters" class="collapsible collapsed">
+	  <legend onclick="toggleFieldset(this);"><%=l(:label_filter_plural)%></legend>
+	  <div>
+		<%= render :partial => 'filters' %>
+	  </div>
+	</fieldset>
+	<fieldset id="options" class="collapsible collapsed">
+		<legend onclick="toggleFieldset(this);"><%= l(:label_options) %></legend>
+		<div style="display: none;">
+			<p class="buttons">
+			<%= l(:workload_show_today) %> <%= date_field_tag 'control_date', @today %>
+			<%= check_box_tag 'exclude_closed', '1', @exclude_closed %> <%= l(:workload_exclude_closed)%>
+		</div>
+	</fieldset>
+<%
+  end
+%>
 <%= error_messages_for 'query' %>
 
 <%
@@ -44,8 +56,8 @@
 			</td>
 			<td style="padding:0px;">
 				<%
-					style = "position:relative;overflow:none;"
-					style += "height: #{t_height + 2}px;"
+					style = "position:relative;overflow:-webkit-paged-x;width:80%;"
+					style += "height: #{t_height + 19}px;"
 				%>
 				<%= content_tag(:div, :style => style, :id => 'workload_area') do %>
 					<%= render :partial => 'headers', :locals => {:t_height => t_height, :headers_height => headers_height, :g_width => g_width, :header_height => header_height, :g_height => g_height} %>

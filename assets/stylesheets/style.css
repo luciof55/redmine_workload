@@ -57,10 +57,10 @@
 /*******************************************************************************
  * Styles for the filter form.
  ******************************************************************************/
-
+.buttons {font-size: 0.9em;margin-bottom: 0em; margin-top: 0em; -webkit-margin-after: 1em; -webkit-margin-before: 0em;}
 .controller-work_load .filters > div,
 .controller-work_load .filters .apply {
-    margin-top: 8px;
+    /* margin-top: 8px; */
 }
 
 .controller-work_load .filters .apply {
@@ -74,13 +74,16 @@ legend {
 }
 
 .controller-work_load .wrapper {
-    margin-top: 30px;
+    margin-top: 5px;
 }
 
 .controller-work_load .users select,
-.controller-work_load .groups select {
-	width: 300px;	
-	height: 150px;
+.controller-work_load .groups select,
+.controller-work_load .groups span,
+.controller-work_load .users span {
+	font-size: 0.9em;
+	width: 300px;
+	height: 148px;
 }
 /*******************************************************************************
  * Styles for the header of the gantt diagram.
@@ -136,7 +139,7 @@ legend {
  ******************************************************************************/
 
 .controller-work_load .wrapper {
-    overflow-x: auto;
+    overflow-x: hidden;
 }
 
 .controller-work_load .data {

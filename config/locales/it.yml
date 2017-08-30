@@ -9,8 +9,10 @@ it:
   workload_show_range: "Periodo:"
   workload_show_rangefrom: "da:"
   workload_show_rangeto: "a:"
+  workload_show_months: "months"
   workload_show_today: "Usa come \"OGGI\":"
   workload_show_filter_user: "Utenti:"
+  workload_show_filter_help: "Select one o more Groups, or select one o more users, then press apply"
   workload_show_issues: "Mostra segnalazioni:"
   workload_show_invisible_issues: "Segnalazioni non visibili a te:"
   workload_show_issue_estimated_hours: "Stimato"
@@ -38,6 +40,7 @@ it:
   workload_trigger_tooltip: "Click sul triangolo per maggiori dettagli"
   workload_overdue_issues_num: "Numero di segnalazioni scadute:"
   workload_overdue_issues_hours: "Ore da segnalazioni scadute:"
+  workload_exclude_closed: "Exclude closed issues"
 
   workload_settings_general_workdays: "Giorni lavorativi settimanali"
   workload_settings_general_workdays_explanation: "I seguenti giorni settimanali saranno considerati come lavorativi:"

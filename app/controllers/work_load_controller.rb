@@ -13,6 +13,31 @@ class WorkLoadController < ApplicationController
   include QueriesHelper
 
   def show
+	if params[:exclude_closed] && params[:exclude_closed] == '1'
+		@exclude_closed = true
+	else
+		@exclude_closed = false
+	end
+	
+	if params[:show_lower] && params[:show_lower] == '1'
+		@show_lower = true
+	else
+		@show_lower = false
+	end
+	
+	if params[:show_normal] && params[:show_normal] == '1'
+		@show_normal = true
+	else
+		@show_normal = false
+	end
+	
+	if params[:show_over] && params[:show_over] == '1'
+		@show_over = true
+	else
+		@show_over = false
+	end
+	
+	workloadOptions = {:show_lower => @show_lower, :show_normal => @show_normal, :show_over => @show_over}
 	
 	if params[:year] && params[:year].to_i > 0
 		@year_from = params[:year].to_i
@@ -61,7 +86,7 @@ class WorkLoadController < ApplicationController
 
     initalizeUsers(params[:workload] || {})       
     
-    @issuesForWorkload = ListUser::getOpenIssuesForUsers(@usersToDisplay)
+    @issuesForWorkload = ListUser::getOpenIssuesForUsers(@usersToDisplay, @exclude_closed)
     @monthsToRender = ListUser::getMonthsInTimespan(@timeSpanToDisplay)
 	
 	case @zoom
@@ -110,7 +135,7 @@ private
 
     # Intersect the list with the list of users that are allowed to be displayed.
     @usersToDisplay = @usersToDisplay & @usersAllowedToDisplay 
-    
+    @usersToDisplay.sort
   end
   
 

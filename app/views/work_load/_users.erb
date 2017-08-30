@@ -8,13 +8,13 @@
 %>
 <%
     style = "position:relative;"
-    style += "height: #{t_height}px;"
+    style += "height: #{t_height + 17}px;"
     style += "width: #{user_width - 1}px;"
 %>
 <%= content_tag(:div, :style => style, :class => 'wl_user_border') do %>
 	<%
 		style = "width: #{user_width - 1}px;"
-		style += "height: #{headers_height}px;"
+		style += "height: #{headers_height + 17}px;"
 	%>
 	<%= content_tag(:div, "", :style => style, :class => 'wl_user_hdr') %>
 	
