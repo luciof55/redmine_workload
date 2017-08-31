@@ -14,7 +14,11 @@
 <%= content_tag(:div, :style => style, :class => 'wl_user_border') do %>
 	<%
 		style = "width: #{user_width - 1}px;"
-		style += "height: #{headers_height + 17}px;"
+		if @workloadData.size > 0
+			style += "height: #{headers_height}px;"
+		else
+			style += "height: #{headers_height + 17}px;"
+		end
 	%>
 	<%= content_tag(:div, "", :style => style, :class => 'wl_user_hdr') %>
 	
@@ -27,7 +31,7 @@
 		%>
 		<% @workloadData.keys.each do |user| %>			
 			<%= content_tag(:div, :style => style, :class => 'wl_user_line') do %>
-				<%= "#{user.firstname} #{user.lastname}" %>
+				<%= link_to "#{user.firstname} #{user.lastname}", issues_path(:set_filter => 1, :assigned_to_id => user.id, :sort => 'priority:desc,updated_on:desc'), target: "_blank" %>
 			<% end %>
 		<% end %>
     <% end %>

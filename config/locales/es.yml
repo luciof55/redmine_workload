@@ -13,7 +13,7 @@ es:
   workload_show_today: "Fecha de cálculo"
   workload_show_filter_user: "Usuarios"
   workload_show_filter_group: "Grupos"  
-  workload_show_filter_help: "Seleccione uno o más grupos o seleccione uno o más usuarios, luego presione Aplicar para realizar la carga"
+  workload_show_filter_help: "Seleccione uno o más grupos o seleccione uno o más usuarios, luego presione Aceptar para realizar la carga"
   workload_show_issues: "Mostrar Tareas"
   workload_show_invisible_issues: "Peticiones ocultas:"
   workload_show_issue_estimated_hours: "Estimadas"
