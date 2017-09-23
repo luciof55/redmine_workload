@@ -98,12 +98,12 @@ class ListUser
 	while week_start <= last_day do
 		hours = 0.0
 		timeSpan.each do |day|
-			if week_start <= day && week_end >= day
+			if hoursForIssuesPerDay[day] && week_start <= day && week_end >= day
 				hours += hoursForIssuesPerDay[day][:hours]
-				result[week_start.cweek] = {:hours => hours, :holiday => false, :clss => 'normal', :start_date => week_start, :end_date => week_end}
 			end
 			break if day > week_end
 		end
+		result[week_start.cweek] = {:hours => hours, :holiday => false, :clss => 'normal', :start_date => week_start, :end_date => week_end}
 		week_start = week_end + 1
 		week_end = week_start + 6
 	end
@@ -118,7 +118,7 @@ class ListUser
 	monthsToRender.each do |month|
 		hours = 0.0
 		timeSpan.each do |day|
-			if month[:first_day] <= day && month[:last_day] >= day
+			if hoursForIssuesPerDay[day] && month[:first_day] <= day && month[:last_day] >= day
 				hours += hoursForIssuesPerDay[day][:hours]
 			end
 			break if day > month[:last_day]
@@ -364,8 +364,10 @@ class ListUser
 			if !summary.has_key?(day)
 				summary[day] = {:hours => 0.0, :holiday => !workingDays.include?(day), :clss => 'normal'}
 			end
-			Rails.logger.info("day: " + day.to_s + " hours: " + issueInfo[day][:hours].to_s)
-			summary[day][:hours] += issueInfo[day][:hours]
+			if issueInfo[day]
+				Rails.logger.info("day: " + day.to_s + " hours: " + issueInfo[day][:hours].to_s)
+				summary[day][:hours] += issueInfo[day][:hours]
+			end
 		end
 		return summary
 	end
