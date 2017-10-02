@@ -61,6 +61,8 @@ de:
   workload_settings_hours_high_min:             "... überlastet angesehen wird:"
 
   workload_settings_holiday_setup:	        "Feiertage bearbeiten"
+  workload_settings_holiday_place: "Place"
+  workload_settings_holiday_half_day: "Half day"
  
   workload_user_vacation:           "Urlaub"
   workload_user_vacation_menu:      "Meine Urlaube"

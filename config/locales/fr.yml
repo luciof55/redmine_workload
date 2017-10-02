@@ -36,3 +36,5 @@ fr:
   workload_show_legend_past: "Passé"
   workload_show_legend_out: "Hors budget"
   workload_exclude_closed: "Exclude closed issues"
+  workload_settings_holiday_place: "Place"
+  workload_settings_holiday_half_day: "Half day"

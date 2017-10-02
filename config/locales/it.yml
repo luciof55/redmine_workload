@@ -57,3 +57,6 @@ it:
   workload_settings_hours_low_min:              "... basso:"
   workload_settings_hours_normal_min:           "... normale:"
   workload_settings_hours_high_min:             "... sovraccarico:"
+  
+  workload_settings_holiday_place: "Place"
+  workload_settings_holiday_half_day: "Half day"

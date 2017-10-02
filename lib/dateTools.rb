@@ -6,14 +6,19 @@ class DateTools
   def self.getWorkingDays()
     result = Set::new
 
-    result.add(1) if Setting['plugin_redmine_workload']['general_workday_monday'] != ''
-    result.add(2) if Setting['plugin_redmine_workload']['general_workday_tuesday'] != ''
-    result.add(3) if Setting['plugin_redmine_workload']['general_workday_wednesday'] != ''
-    result.add(4) if Setting['plugin_redmine_workload']['general_workday_thursday'] != ''
-    result.add(5) if Setting['plugin_redmine_workload']['general_workday_friday'] != ''
-    result.add(6) if Setting['plugin_redmine_workload']['general_workday_saturday'] != ''
-    result.add(7) if Setting['plugin_redmine_workload']['general_workday_sunday'] != ''
+	non_working_week_days = Setting['non_working_week_days']
+	#Rails.logger.info("------------------------non_working_week_days: " + non_working_week_days.to_s)
+	
+    result.add(1) if !non_working_week_days.include?('1')
+    result.add(2) if !non_working_week_days.include?('2')
+    result.add(3) if !non_working_week_days.include?('3')
+    result.add(4) if !non_working_week_days.include?('4')
+    result.add(5) if !non_working_week_days.include?('5')
+    result.add(6) if !non_working_week_days.include?('6')
+    result.add(7) if !non_working_week_days.include?('7')
 
+	#Rails.logger.info("------------------------result: " + result.to_s)
+	
     return result
   end
   

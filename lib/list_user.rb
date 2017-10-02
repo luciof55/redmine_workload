@@ -365,7 +365,7 @@ class ListUser
 				summary[day] = {:hours => 0.0, :holiday => !workingDays.include?(day), :clss => 'normal'}
 			end
 			if issueInfo[day]
-				Rails.logger.info("day: " + day.to_s + " hours: " + issueInfo[day][:hours].to_s)
+				#Rails.logger.info("day: " + day.to_s + " hours: " + issueInfo[day][:hours].to_s)
 				summary[day][:hours] += issueInfo[day][:hours]
 			end
 		end

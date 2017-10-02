@@ -2,11 +2,19 @@
     <%= form.label :description_date_from %><br>
     <%= form.date_select :start_holliday, default: { year: @this_year} %>    
   </p>
+  
+  <%if @custom_field %>
+	<%= form.label @custom_field.name %><br>
+	<%= form.select :place, options_for_select(@items, @wl_national_holiday.place), {:include_blank => true}%>
+  <% end %>
+  
+  <p>
+    <%= l(:workload_settings_holiday_half_day) %><br>
+	<%= form.select :half_day, options_for_select(@half_day_options, @wl_national_holiday.half_day), {:include_blank => false}%>
+  </p>
  
   <p>
     <%= form.label :reason %><br>
     <%= form.text_field :reason %>
   </p>
-  <input type="hidden"
-         name="year"
-         value="<%=@this_year%>">
+  <input type="hidden" name="year" value="<%=@this_year%>">

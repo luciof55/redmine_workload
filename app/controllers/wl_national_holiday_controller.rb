@@ -4,6 +4,7 @@ class WlNationalHolidayController < ApplicationController
  
   before_action :check_edit_rights, only: [:edit, :update, :create, :destroy]
   before_action :select_year 
+  before_action :load_places, :load_half_day_options, only: [:new, :edit]
   
   helper :work_load
   
@@ -15,7 +16,7 @@ class WlNationalHolidayController < ApplicationController
   end
   
   def new
-
+	@wl_national_holiday = WlNationalHoliday.new()
   end
   
   def edit
@@ -66,6 +67,29 @@ class WlNationalHolidayController < ApplicationController
 
 
 private
+
+	def load_places
+		@items = []
+		custom_field = CustomField.where("name = 'Sede'").first
+		if custom_field
+			Rails.logger.info("custom_field: " + custom_field.to_s)
+			Rails.logger.info("custom_field name: " + custom_field.name.to_s)
+			Rails.logger.info("custom_field possible_values: " + custom_field.possible_values.to_s)
+			custom_field.possible_values.each do |v|
+				Rails.logger.info("value: " + v.to_s)
+				index = v.to_s.index('-')
+				if !index.nil? && index > 0 && v.to_s[0, index].to_i > 0
+					item = [v.to_s, v.to_s[0, index].to_i]
+					@items.push(item)
+				end
+			end
+			@custom_field = custom_field
+		end
+	end
+	
+	def load_half_day_options
+		@half_day_options = [[l(:general_text_No), 0], [l(:general_text_Yes), 1]]
+	end
 
   def check_edit_rights
     right = User.current.allowed_to_globally?(:edit_national_holiday)

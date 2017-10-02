@@ -61,11 +61,13 @@ en:
   workload_settings_hours_high_min:             "Overloaded"
   
   workload_settings_holiday_setup:	        "Configure holidays"
+  workload_settings_holiday_place: "Place"
+  workload_settings_holiday_half_day: "Half day"
  
   workload_user_vacation:           "Vacation"
   workload_user_vacation_menu:      "Manage Vacations"
   workload_user_vacation_new:       "Create new Vacation"
-  workload_user_vacation_edit:       "Edit Vacation"
+  workload_user_vacation_edit:      "Edit Vacation"
   workload_user_vacation_type:      "Type"
   
   workload_user_data_site_title:   "User thresholds"

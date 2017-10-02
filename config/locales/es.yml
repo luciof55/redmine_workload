@@ -60,6 +60,8 @@ es:
   workload_settings_hours_high_min:             "Sobrecargado"
   
   workload_settings_holiday_setup:	        "Configurar feriados"
+  workload_settings_holiday_place: "Sede"
+  workload_settings_holiday_half_day: "Medio dia"
  
   workload_user_vacation:           "Vacaciones"
   workload_user_vacation_menu:      "Administrar vacaciones"
