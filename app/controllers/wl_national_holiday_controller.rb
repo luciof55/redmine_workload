@@ -4,7 +4,7 @@ class WlNationalHolidayController < ApplicationController
  
   before_action :check_edit_rights, only: [:edit, :update, :create, :destroy]
   before_action :select_year 
-  before_action :load_places, :load_half_day_options, only: [:new, :edit]
+  before_action :load_places, :load_half_day_options, only: [:index, :new, :edit, :update, :create]
   
   helper :work_load
   

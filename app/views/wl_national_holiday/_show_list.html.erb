@@ -4,6 +4,9 @@
 				<th><%= translate 'id' %></th>
 				<th><%= translate 'start' %></th>
 				<th><%= translate 'end' %></th>
+				<%if @custom_field %>
+					<th><%= @custom_field.name %></th>
+				<% end %>
 				<th><%= translate 'reason' %></th>
 				<% if is_allowed %>
 					<th colspan="2"></th>
@@ -15,6 +18,9 @@
 				<td><%= holiday.id.to_s %></td>
 				<td><%= holiday.start_holliday.blank? ? '' : holiday.start_holliday.to_date.to_s %></td>
 				<td><%= holiday.end_holliday.blank? ? '' : holiday.end_holliday.to_date.to_s %></td>
+				<%if @custom_field %>
+					<td><%= holiday.place.blank? ? '' : holiday.gel_place %></td>
+				<% end %>
 				<td><%= holiday.reason.blank? ? '' : holiday.reason %></td>				
 				<% if is_allowed %>
 	      			<td><%= link_to l(:button_edit), edit_wl_national_holiday_path(holiday, :year => @this_year) %></td>
