@@ -60,8 +60,8 @@ class ListUser
     raise ArgumentError unless today.kind_of?(Date)
 
     hoursRemaining = ListUser::getEstimatedTimeForIssue(issue)
-    issue.assigned_to.nil? ? assignee = 'all' : assignee = issue.assigned_to.id
-    workingDays = DateTools::getWorkingDaysInTimespan(timeSpan, assignee )    
+    issue.assigned_to.nil? ? assignee = 'all' : assignee = issue.assigned_to
+    workingDays = DateTools::getWorkingDaysInTimespan(timeSpan, assignee)    
 	
 	Rails.logger.info("issue: " + issue.id.to_s + " hoursRemaining: " + hoursRemaining.to_s + " assignee: " + assignee.to_s + " - workingDays: " + workingDays.to_s)
     
@@ -148,7 +148,7 @@ class ListUser
 
     issues.each do |issue|
 		assignee = issue.assigned_to
-		workingDays = DateTools::getWorkingDaysInTimespan(timeSpan, assignee.id)
+		workingDays = DateTools::getWorkingDaysInTimespan(timeSpan, assignee)
 		
 		if !result.has_key?(issue.assigned_to)
 			result[assignee] = {:overdue_hours => 0.0, :overdue_number => 0, :total => Hash::new, :invisible => Hash::new}
@@ -215,7 +215,7 @@ class ListUser
 	result.keys.each do |assigneeKey|
 		result[assigneeKey][:total].keys.each do |weekKey|
 			timeSpan = result[assigneeKey][:total][weekKey][:start_date]..result[assigneeKey][:total][weekKey][:end_date]
-			days = DateTools::getRealDistanceInDays(timeSpan, assigneeKey.id)
+			days = DateTools::getRealDistanceInDays(timeSpan, assigneeKey)
 			user_workload_data = WlUserData.find_by user_id: assigneeKey.id
 			if user_workload_data
 				threshold_highload_min = user_workload_data.threshold_highload_min
@@ -263,7 +263,7 @@ class ListUser
 		result.keys.each do |assigneeKey|
 			result[assigneeKey][:total].keys.each do |monthKey|
 				timeSpan = result[assigneeKey][:total][monthKey][:start_date]..result[assigneeKey][:total][monthKey][:end_date]
-				days = DateTools::getRealDistanceInDays(timeSpan, assigneeKey.id)
+				days = DateTools::getRealDistanceInDays(timeSpan, assigneeKey)
 				user_workload_data = WlUserData.find_by user_id: assigneeKey.id
 				if user_workload_data
 					threshold_highload_min = user_workload_data.threshold_highload_min
