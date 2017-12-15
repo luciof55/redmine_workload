@@ -2,6 +2,8 @@
 class WorkLoadController < ApplicationController
 
   unloadable
+  
+  before_action :check_show_rights
 
   helper :gantt
   helper :issues
@@ -148,4 +150,13 @@ private
         return default
     end
   end
+  
+   def check_show_rights
+    right = User.current.allowed_to_globally?(:view_project_workload)
+    if !right
+      flash[:error] = translate 'notice_not_authorized'
+	  redirect_to request.referer || '/my/page'
+    end
+  end
+  
 end

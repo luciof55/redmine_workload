@@ -14,7 +14,7 @@ Redmine::Plugin.register :redmine_workload do
   author_url 'https://www.linkedin.com/in/lucioferrero/'
     
   menu :top_menu, :WorkLoad, { :controller => 'work_load', :action => 'show' }, :caption => :workload_title,
-    :if =>  Proc.new { User.current.logged? }
+    :if =>  Proc.new { User.current.logged? && User.current.allowed_to_globally?(:view_project_workload) }
 
 
   settings :partial => 'settings/workload_settings',
