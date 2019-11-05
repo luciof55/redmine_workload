@@ -6,7 +6,7 @@ class WlUserDatasController < ApplicationController
   
 	def index
 		@is_allowed = User.current.allowed_to_globally?(:edit_user_data)
-		@wl_users_data = WlUserData.all
+		@wl_users_data = WlUserData.joins(:user)
 	end
   
 	def new
