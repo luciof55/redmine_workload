@@ -3,24 +3,24 @@
 		<legend><%=  l(:workload_settings_hours) %></legend>
 		<p>
 		  <label><%= l(:workload_show_filter_user) %></label>
-		  <%= form.select :user_id, principals_options_for_select(@usersToDisplay, @wl_user_data.user), :multiple => false, :include_blank => true, disabled: disabled %>
+		  <%= form.select :user_id, principals_options_for_select(@usersToDisplay, @wl_user_data.user), :multiple => false, :include_blank => true, disabled: disabled, :required => true %>
 		</p>	
 		<p>
 		  <%= l(:workload_settings_leastdailyworkload) %>
 		</p>
 		<p>
 		  <label><%= l(:workload_settings_hours_low_min) %></label>
-		  <%= form.text_field :threshold_lowload_min, disabled: !@is_allowed %>
+		  <%= form.text_field :threshold_lowload_min, disabled: !@is_allowed, :required => true %>
 		  <%= l(:field_default_value)%>: <%= Setting['plugin_redmine_workload']['threshold_lowload_min']%> 
 		</p>
 		<p>
 		  <label><%= l(:workload_settings_hours_normal_min) %></label>
-		  <%= form.text_field :threshold_normalload_min, disabled: !@is_allowed  %>
+		  <%= form.text_field :threshold_normalload_min, disabled: !@is_allowed, :required => true %>
 		  <%= l(:field_default_value)%>: <%= Setting['plugin_redmine_workload']['threshold_normalload_min']%>
 		</p>
 		<p>
 		  <label><%= l(:workload_settings_hours_high_min) %></label>
-		  <%= form.text_field :threshold_highload_min, disabled: !@is_allowed  %>
+		  <%= form.text_field :threshold_highload_min, disabled: !@is_allowed, :required => true %>
 		  <%= l(:field_default_value)%>: <%= Setting['plugin_redmine_workload']['threshold_highload_min']%>
 		</p>
 	</fieldset>

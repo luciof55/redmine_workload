@@ -17,6 +17,7 @@ class WlNationalHolidayController < ApplicationController
   
   def new
 	@wl_national_holiday = WlNationalHoliday.new()
+	@wl_national_holiday.start_holliday = Date.today
   end
   
   def edit
@@ -24,36 +25,44 @@ class WlNationalHolidayController < ApplicationController
   end    
   
   def update
-    @wl_national_holiday = WlNationalHoliday.find(params[:id]) rescue nil 
-    respond_to do |format|
-	  new_params = params 
-	  new_params[:wl_national_holiday]["end_holliday(1i)"] = params[:wl_national_holiday]["start_holliday(1i)"]
-      new_params[:wl_national_holiday]["end_holliday(2i)"] = params[:wl_national_holiday]["start_holliday(2i)"]
-	  new_params[:wl_national_holiday]["end_holliday(3i)"] = params[:wl_national_holiday]["start_holliday(3i)"]
-
-      if @wl_national_holiday.update_attributes(new_params[:wl_national_holiday])
-        format.html { redirect_to(:action => 'index', :notice => 'Holiday was successfully updated.', :params => { :year =>params[:year]} ) }
-        format.xml  { head :ok }
-      else
-        format.html { 
-          flash[:error] = "<ul>" + @wl_national_holiday.errors.full_messages.map{|o| "<li>" + o + "</li>" }.join("") + "</ul>"
-          render :action => "edit" }
-        format.xml  { render :xml => @wl_national_holiday.errors, :status => :unprocessable_entity }
-      end
+    national_holiday = WlNationalHoliday.find(params[:id]) rescue nil
+	
+	national_holiday.start_holliday = params[:wl_national_holiday][:start_holliday]
+	national_holiday.reason = params[:wl_national_holiday][:reason]
+	national_holiday.half_day = params[:wl_national_holiday][:half_day]
+	national_holiday.place = params[:wl_national_holiday][:place]
+	national_holiday.end_holliday = national_holiday.start_holliday
+    
+	respond_to do |format|
+		if national_holiday.save
+			format.html { redirect_to(:action => 'index', :notice => 'Holiday was successfully updated.', :params => { :year =>params[:year]} ) }
+			format.xml  { head :ok }
+		else
+			format.html { 
+			  flash[:error] = "<ul>" + national_holiday.errors.full_messages.map{|o| "<li>" + o + "</li>" }.join("") + "</ul>"
+			  redirect_to(:action => 'edit') }
+			format.xml  { render :xml => national_holiday.errors, :status => :unprocessable_entity }
+		end
     end
   end
   
   def create
-    @wl_national_holiday = WlNationalHoliday.new(params[:wl_national_holiday])
-	@wl_national_holiday.end_holliday = @wl_national_holiday.start_holliday 
-    if @wl_national_holiday.save
+    national_holiday = WlNationalHoliday.new
+		
+	national_holiday.start_holliday = params[:wl_national_holiday][:start_holliday]
+	national_holiday.reason = params[:wl_national_holiday][:reason]
+	national_holiday.half_day = params[:wl_national_holiday][:half_day]
+	national_holiday.place = params[:wl_national_holiday][:place]
+	national_holiday.end_holliday = national_holiday.start_holliday
+	
+    if national_holiday.save
       redirect_to action: 'index', notice: 'Holiday was successfully saved.', year: params[:year]
     else
       respond_to do |format| 
         format.html {
-          flash[:error] = "<ul>" + @wl_national_holiday.errors.full_messages.map{|o| "<li>" + o + "</li>" }.join("") + "</ul>" 
-          render :new }
-        format.api  { render_validation_errors(@wl_national_holiday) }
+          flash[:error] = "<ul>" + national_holiday.errors.full_messages.map{|o| "<li>" + o + "</li>" }.join("") + "</ul>" 
+          redirect_to(:action => 'new') }
+        format.api  { render_validation_errors(national_holiday) }
       end 
     end    
   end

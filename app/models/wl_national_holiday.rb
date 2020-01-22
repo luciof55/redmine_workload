@@ -1,13 +1,8 @@
 class WlNationalHoliday < ActiveRecord::Base
   unloadable
-  attr_accessible :start_holliday
-  attr_accessible :end_holliday
-  attr_accessible :reason
-  attr_accessible :place
-  attr_accessible :half_day
   
   validates :start_holliday, :date => true
-  validates_presence_of :start_holliday, :reason
+  validates_presence_of :start_holliday, :reason, :place
   validate :check_overlapping
   
   after_save :clearCache

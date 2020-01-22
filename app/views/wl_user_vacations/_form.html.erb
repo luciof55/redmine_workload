@@ -3,24 +3,27 @@
 		<legend><%=  l(:workload_user_vacation) %></legend>
 		<p>
 			<label><%= l(:workload_show_filter_user) %></label>
-			<%= form.select :user_id, principals_options_for_select(@usersToDisplay, @wl_user_vacation.user), :multiple => false, :include_blank => true, disabled: disabled %>
+			<%= form.select :user_id, principals_options_for_select(@usersToDisplay, @wl_user_vacation.user), :multiple => false, :include_blank => true, disabled: disabled, :required => true %>
 		</p>	
 		<p>
-			<%= form.label :description_date_from %><br>
-			<%= form.date_select :date_from, default: { year: @this_year} %>    
+			<%= form.label :description_date_from %>
+			<%= form.date_field(:date_from, :size => 10, :required => true, :value => @wl_user_vacation.date_from) %>
+			<%= calendar_for('date_from') %>
 		</p>
 		<p>
-			<%= form.label :description_date_to %><br>
-			<%= form.date_select :date_to, default: { year: @this_year} %>    
+			<%= form.label :description_date_to %>
+			<%= form.date_field(:date_to, :size => 10, :required => true, :value => @wl_user_vacation.date_to) %>
+			<%= calendar_for('date_to') %>
 		</p>
 		<p>
 			<%= form.label :comments %>
-			<%= form.text_field :comments %>
+			<%= form.text_field :comments, :value => @wl_user_vacation.comments %>
 		</p>
 		<p>
 			<%= form.label l(:workload_user_vacation_type) %>
-			<%= form.text_field :vacation_type %>  	
+			<%= form.text_field :vacation_type, :value => @wl_user_vacation.vacation_type %>  	
 		</p>
 		<input type="hidden" name="year" value="<%=@this_year%>">
 	</fieldset>
 </div>
+<% include_calendar_headers_tags %>

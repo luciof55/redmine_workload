@@ -1,20 +1,27 @@
-  <p>
-    <%= form.label :description_date_from %><br>
-    <%= form.date_select :start_holliday, default: { year: @this_year} %>    
-  </p>
-  
-  <%if @custom_field %>
-	<%= form.label @custom_field.name %><br>
-	<%= form.select :place, options_for_select(@items, @wl_national_holiday.place), {:include_blank => true}%>
-  <% end %>
-  
-  <p>
-    <%= l(:workload_settings_holiday_half_day) %><br>
-	<%= form.select :half_day, options_for_select(@half_day_options, @wl_national_holiday.half_day), {:include_blank => false}%>
-  </p>
- 
-  <p>
-    <%= form.label :reason %><br>
-    <%= form.text_field :reason %>
-  </p>
-  <input type="hidden" name="year" value="<%=@this_year%>">
+<div class="splitcontentleft">
+	<fieldset class="box tabular">
+		<legend><%=  l(:workload_holiday_title) %></legend>
+		<p>
+			<%= form.label :description_date_from %>
+			<%= form.date_field(:start_holliday, :size => 10, :required => true, :value => @wl_national_holiday.start_holliday) %>
+			<%= calendar_for('start_holliday') %>
+		</p>
+
+		<%if @custom_field %>
+			<%= form.label @custom_field.name %>
+			<%= form.select :place, options_for_select(@items, @wl_national_holiday.place), {:include_blank => true, :required => true}%>
+		<% end %>
+
+		<p>
+			<%= l(:workload_settings_holiday_half_day) %>
+			<%= form.select :half_day, options_for_select(@half_day_options, @wl_national_holiday.half_day), {:include_blank => false}%>
+		</p>
+
+		<p>
+			<%= form.label :reason %>
+			<%= form.text_field :reason, :value => @wl_national_holiday.reason %>
+		</p>
+		<input type="hidden" name="year" value="<%=@this_year%>">
+	</fieldset>
+</div>
+<% include_calendar_headers_tags %>

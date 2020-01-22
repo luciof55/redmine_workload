@@ -1,9 +1,7 @@
 class WlUserVacation < ActiveRecord::Base
   unloadable
   belongs_to :user
-  attr_accessible :id, :user_id, :date_from, :date_to, :comments, :vacation_type
-  validates_presence_of :user_id, :date_from, :date_to
-  
+  validates :user_id, :date_from, :date_to, presence: true
   validates :date_from, :date => true
   validates :date_to, :date => true
   validate :check_datum, :check_overlapping
@@ -18,12 +16,22 @@ class WlUserVacation < ActiveRecord::Base
   end
   
   def check_overlapping
-	if WlUserVacation.where("id != ? AND user_id = ? AND date_from <= ? AND date_to >= ?", self.id, self.user_id, self.date_to, self.date_to).empty?
-		if !WlUserVacation.where("id != ? AND user_id = ? AND date_from <= ? AND date_to >= ?", self.id, self.user_id, self.date_from, self.date_from).empty?
-			errors.add :date_from, :workload_overlapping 
+	if self.id
+		if WlUserVacation.where("id != ? AND user_id = ? AND date_from <= ? AND date_to >= ?", self.id, self.user_id, self.date_to, self.date_to).empty?
+			if !WlUserVacation.where("id != ? AND user_id = ? AND date_from <= ? AND date_to >= ?", self.id, self.user_id, self.date_from, self.date_from).empty?
+				errors.add :date_from, :workload_overlapping 
+			end
+		else
+			errors.add :date_to, :workload_overlapping 
 		end
 	else
-		errors.add :date_to, :workload_overlapping 
+		if WlUserVacation.where("user_id = ? AND date_from <= ? AND date_to >= ?", self.user_id, self.date_to, self.date_to).empty?
+			if !WlUserVacation.where("user_id = ? AND date_from <= ? AND date_to >= ?", self.user_id, self.date_from, self.date_from).empty?
+				errors.add :date_from, :workload_overlapping 
+			end
+		else
+			errors.add :date_to, :workload_overlapping 
+		end
 	end
   end
   

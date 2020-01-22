@@ -9,8 +9,11 @@ class WlUserVacationsController < ApplicationController
   end
   
   def new
+	Rails.logger.info("NEW")
     @usersToDisplay = User.all.sort_by { |n| n[:lastname] }
 	@wl_user_vacation = WlUserVacation.new
+	@wl_user_vacation.date_from = Date.today
+	@wl_user_vacation.date_to = Date.today
   end
   
   def edit
@@ -19,34 +22,47 @@ class WlUserVacationsController < ApplicationController
   end    
   
   def update
-	@wl_user_vacation = WlUserVacation.find(params[:id]) rescue nil 
-	respond_to do |format|
-	  if @wl_user_vacation.update_attributes(params[:wl_user_vacation])
-		format.html { 
-			flash[:notice] = 'Vacation was successfully updated.'
-			redirect_to(:action => 'index', :params => { :year =>params[:year]} )
-		}
-		format.xml  { head :ok }
-	  else
-		format.html {
-		  flash[:error] = "<ul>" + @wl_user_vacation.errors.full_messages.map{|o| "<li>" + o + "</li>" }.join("") + "</ul>" 
-		  redirect_to(:action => 'edit') }
-		format.xml  { render :xml => @wl_user_vacation.errors, :status => :unprocessable_entity }
-	  end
+	user_vacation = WlUserVacation.find(params[:id]) rescue nil
+	
+	user_vacation.user_id = params[:wl_user_vacation][:user_id]
+	user_vacation.comments = params[:wl_user_vacation][:comments]
+	user_vacation.vacation_type = params[:wl_user_vacation][:vacation_type]
+	user_vacation.date_from = params[:wl_user_vacation][:date_from]
+	user_vacation.date_to = params[:wl_user_vacation][:date_to]
+	
+	if user_vacation.save
+		flash[:notice] = 'Vacation was successfully updated.'
+		redirect_to(:action => 'index', :params => { :year =>params[:year]} )
+	else
+		respond_to do |format|
+			format.html {
+				  flash[:error] = "<ul>" + user_vacation.errors.full_messages.map{|o| "<li>" + o + "</li>" }.join("") + "</ul>" 
+				  redirect_to(:action => 'edit') }
+			format.xml  { render :xml => user_vacation.errors, :status => :unprocessable_entity }
+			format.api  { render_validation_errors(user_vacation) }
+		end
 	end
   end
   
   def create
-	@wl_user_vacation = WlUserVacation.new(params[:wl_user_vacations])
-	if @wl_user_vacation.save
+	user_vacation = WlUserVacation.new
+	
+	user_vacation.user_id = params[:wl_user_vacations][:user_id]
+	user_vacation.comments = params[:wl_user_vacations][:comments]
+	user_vacation.vacation_type = params[:wl_user_vacations][:vacation_type]
+	user_vacation.date_from = params[:wl_user_vacations][:date_from]
+	user_vacation.date_to = params[:wl_user_vacations][:date_to]
+	
+	if user_vacation.save
 		flash[:notice] = 'Vacation was successfully saved.'
 		redirect_to action: 'index', year: params[:year]
 	else
 		respond_to do |format| 
 			format.html {
-			  flash[:error] = "<ul>" + @wl_user_vacation.errors.full_messages.map{|o| "<li>" + o + "</li>" }.join("") + "</ul>"
+			  flash[:error] = "<ul>" + user_vacation.errors.full_messages.map{|o| "<li>" + o + "</li>" }.join("") + "</ul>"
 			  redirect_to(:action => 'new') }
-			format.api  { render_validation_errors(@wl_user_vacation) }
+			format.xml  { render :xml => user_vacation.errors, :status => :unprocessable_entity }
+			format.api  { render_validation_errors(user_vacation) }
 		end 
 	end
   end

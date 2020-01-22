@@ -36,14 +36,20 @@ class WlUserDatasController < ApplicationController
 			else
 				#If data does not exist create it
 				logger.info "Se crea"
-				@wl_user_data = WlUserData.new(params[:wl_user_data])
-				if @wl_user_data.save
+				user_data = WlUserData.new
+				
+				user_data.user_id = params[:wl_user_data][:user_id]
+				user_data.threshold_lowload_min = params[:wl_user_data][:threshold_lowload_min]
+				user_data.threshold_normalload_min = params[:wl_user_data][:threshold_normalload_min]
+				user_data.threshold_highload_min = params[:wl_user_data][:threshold_highload_min]
+				
+				if user_data.save
 					flash[:notice] = 'Data was successfully saved.'
 					redirect_to action: 'index' 
 				else
 					respond_to do |format| 
 						format.html {
-							flash[:error] = "<ul>" + @wl_user_data.errors.full_messages.map{|o| "<li>" + o + "</li>" }.join("") + "</ul>"
+							flash[:error] = "<ul>" + user_data.errors.full_messages.map{|o| "<li>" + o + "</li>" }.join("") + "</ul>"
 							redirect_to(:action => 'new')
 						}
 					end 
@@ -119,16 +125,21 @@ class WlUserDatasController < ApplicationController
 	def update
 		logger.info "Parameter sind: #{params.inspect}"
 		begin
-			@wl_user_data = WlUserData.find(params[:id])
+			user_data = WlUserData.find(params[:id])
 			respond_to do |format|
-				if @wl_user_data.update(params[:wl_user_data])
+				
+				user_data.threshold_lowload_min = params[:wl_user_data][:threshold_lowload_min]
+				user_data.threshold_normalload_min = params[:wl_user_data][:threshold_normalload_min]
+				user_data.threshold_highload_min = params[:wl_user_data][:threshold_highload_min]
+				
+				if user_data.save
 					format.html {
 						flash[:notice]= l(:notice_account_updated)
 						redirect_to(:action => 'index')
 					}
 				else
 					format.html { 
-						flash[:error] = "<ul>" + @wl_user_data.errors.full_messages.map{|o| "<li>" + o + "</li>" }.join("") + "</ul>" 
+						flash[:error] = "<ul>" + user_data.errors.full_messages.map{|o| "<li>" + o + "</li>" }.join("") + "</ul>" 
 						redirect_to(:action => 'edit')
 					}
 				end

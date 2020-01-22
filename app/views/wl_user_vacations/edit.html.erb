@@ -2,7 +2,7 @@
 
 <h2><%= l(:workload_user_vacation_edit) %></h2>
 
-<%= form_for @wl_user_vacation do |f| %>
+<%= form_for @wl_user_vacation, html: {class: "nifty_form"} do |f| %>
 	<%= render(partial: "form", locals: {form: f, disabled: false}) %>
 	<div style = "float: none" class="splitcontentleft">
 		<p>

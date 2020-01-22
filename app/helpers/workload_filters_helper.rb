@@ -5,14 +5,14 @@ module WorkloadFiltersHelper
 		case in_or_out
 		when :in
 		  if zoom < 4
-			link_to l(:text_zoom_in), params.merge({:zoom => (zoom + 1)}), :class => 'icon icon-zoom-in'
+			link_to l(:text_zoom_in), {:params => request.query_parameters.merge({:zoom => (zoom + 1)})}, :class => 'icon icon-zoom-in'
 		  else
 			content_tag(:span, l(:text_zoom_in), :class => 'icon icon-zoom-in').html_safe
 		  end
 
 		when :out
 		  if zoom > 2
-			link_to l(:text_zoom_out), params.merge({:zoom => (zoom - 1)}), :class => 'icon icon-zoom-out'
+			link_to l(:text_zoom_out), {:params => request.query_parameters.merge({:zoom => (zoom - 1)})}, :class => 'icon icon-zoom-out'
 		  else
 			content_tag(:span, l(:text_zoom_out), :class => 'icon icon-zoom-out').html_safe
 		  end
