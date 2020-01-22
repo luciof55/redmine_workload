@@ -1,4 +1,4 @@
-class CreateWlUserData < ActiveRecord::Migration
+class CreateWlUserData < Rails.version < '5.1' ? ActiveRecord::Migration : ActiveRecord::Migration[4.2]
   def change
     create_table :wl_user_datas do |t|
       t.belongs_to :user, index: true, :null => false      
