@@ -58,7 +58,11 @@ class ListUser
     project = Project.arel_table
     issue_status = IssueStatus.arel_table
 	
-	projectsId = Setting['plugin_redmine_workload']['projects'].split(",")
+	projectsId = []
+	
+	if (!Setting['plugin_redmine_workload']['projects'].nil?)
+		projectsId = Setting['plugin_redmine_workload']['projects'].split(",")
+	end
 
     if exclude_closed
 		# Fetch only open issues 
