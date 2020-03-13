@@ -38,3 +38,5 @@ fr:
   workload_exclude_closed: "Exclude closed issues"
   workload_settings_holiday_place: "Place"
   workload_settings_holiday_half_day: "Half day"
+  workload_settings_projects: "Projects"
+  workload_for_workload: "Workload"

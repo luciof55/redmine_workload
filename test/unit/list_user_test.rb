@@ -8,7 +8,9 @@ class ListUserTest < ActiveSupport::TestCase
 
 
   test "getOpenIssuesForUsers returns empty list if no users given" do
-    assert_equal [], ListUser::getOpenIssuesForUsers([])
+    firstDay = Date::new(2012, 3, 29)
+    lastDay = Date::new(2012, 3, 28)
+	assert_equal [], ListUser::getOpenIssuesForUsers([], firstDay..lastDay)
   end
 
   test "getOpenIssuesForUsers returns only issues of interesting users" do
@@ -16,6 +18,9 @@ class ListUserTest < ActiveSupport::TestCase
     user2 = User.generate!
     
     project1 = Project.generate!
+	
+	firstDay = Date::new(2012, 3, 29)
+    lastDay = Date::new(2012, 3, 28)
     
     User.add_to_project(user1, project1, Role.find_by_name('Manager')) 
     User.add_to_project(user2, project1, Role.find_by_name('Manager'))
@@ -30,12 +35,15 @@ class ListUserTest < ActiveSupport::TestCase
                              :project => project1
                             )
 
-    assert_equal [issue2], ListUser::getOpenIssuesForUsers([user2])
+    assert_equal [issue2], ListUser::getOpenIssuesForUsers([user2], firstDay..lastDay)
   end
 
   test "getOpenIssuesForUsers returns only open issues" do
     user = User.generate!
     project1 = Project.generate!
+	
+	firstDay = Date::new(2012, 3, 29)
+    lastDay = Date::new(2012, 3, 28)
     
     User.add_to_project(user, project1, Role.find_by_name('Manager')) 
 
@@ -54,7 +62,7 @@ class ListUserTest < ActiveSupport::TestCase
                              :project => project1
                               )
             
-    assert_equal [issue2], ListUser::getOpenIssuesForUsers([user])
+    assert_equal [issue2], ListUser::getOpenIssuesForUsers([user], firstDay..lastDay)
   end
 
   test "getMonthsBetween returns [] if last day after first day" do
@@ -150,7 +158,7 @@ class ListUserTest < ActiveSupport::TestCase
     firstDay = Date::new(2013, 5, 31)
     lastDay = Date::new(2013, 5, 29)
 
-    assertIssueTimesHashEquals Hash::new, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, firstDay)
+    assertIssueTimesHashEquals Hash::new, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, firstDay, true)
   end
 
   test "getHoursForIssuesPerDay works if issue is completely in given time span and nothing done" do
@@ -194,7 +202,7 @@ class ListUserTest < ActiveSupport::TestCase
       }
     }
 
-    assertIssueTimesHashEquals expectedResult, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, firstDay)
+    assertIssueTimesHashEquals expectedResult, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, firstDay, true)
   end
 
   test "getHoursForIssuesPerDay works if issue lasts after time span and done_ratio > 0" do
@@ -243,7 +251,7 @@ class ListUserTest < ActiveSupport::TestCase
       }
     }
 
-    assertIssueTimesHashEquals expectedResult, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, firstDay)
+    assertIssueTimesHashEquals expectedResult, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, firstDay, true)
   end
 
   test "getHoursForIssuesPerDay works if issue starts before time span" do
@@ -293,7 +301,7 @@ class ListUserTest < ActiveSupport::TestCase
       }
     }
 
-    assertIssueTimesHashEquals expectedResult, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, firstDay)
+    assertIssueTimesHashEquals expectedResult, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, firstDay, true)
   end
 
   test "getHoursForIssuesPerDay works if issue completely before time span" do
@@ -336,7 +344,7 @@ class ListUserTest < ActiveSupport::TestCase
       }
     }
 
-    assertIssueTimesHashEquals expectedResult, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, firstDay)
+    assertIssueTimesHashEquals expectedResult, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, firstDay, true)
   end
 
   test "getHoursForIssuesPerDay works if issue has no due date" do
@@ -378,7 +386,7 @@ class ListUserTest < ActiveSupport::TestCase
       }
     }
 
-    assertIssueTimesHashEquals expectedResult, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, firstDay)
+    assertIssueTimesHashEquals expectedResult, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, firstDay, true)
   end
 
   test "getHoursForIssuesPerDay works if issue has no start date" do
@@ -420,7 +428,7 @@ class ListUserTest < ActiveSupport::TestCase
       }
     }
 
-    assertIssueTimesHashEquals expectedResult, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, firstDay)
+    assertIssueTimesHashEquals expectedResult, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, firstDay, true)
   end
 
   test "getHoursForIssuesPerDay works if in time span and issue overdue" do
@@ -485,7 +493,7 @@ class ListUserTest < ActiveSupport::TestCase
       }
     }
 
-    assertIssueTimesHashEquals expectedResult, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, today)
+    assertIssueTimesHashEquals expectedResult, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, today, true)
   end
 
   test "getHoursForIssuesPerDay works if issue is completely in given time span, but has started" do
@@ -548,7 +556,7 @@ class ListUserTest < ActiveSupport::TestCase
       }
     }
 
-    assertIssueTimesHashEquals expectedResult, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, today)
+    assertIssueTimesHashEquals expectedResult, ListUser::getHoursForIssuesPerDay(issue, firstDay..lastDay, today, true)
   end
 
   test "getHoursPerUserIssueAndDay returns correct structure" do
@@ -599,25 +607,30 @@ class ListUserTest < ActiveSupport::TestCase
     assert workloadData[user].has_key?(project2)
   end
 
-  test "getEstimatedTimeForIssue works for issue without children." do
+  test "getEstimatedTimeForIssueForWorkload works for issue without children." do
     issue = Issue.generate!(:estimated_hours => 13.2)
-    assert_in_delta 13.2, ListUser::getEstimatedTimeForIssue(issue), 1e-4
+	firstDay = Date::new(2013, 5, 25)
+    lastDay = Date::new(2013, 6, 4)
+    assert_in_delta 13.2, ListUser::getEstimatedTimeForIssueForWorkload(issue, firstDay..lastDay), 1e-4
   end
 
-  test "getEstimatedTimeForIssue works for issue with children." do
+  test "getEstimatedTimeForIssueForWorkload works for issue with children." do
     parent = Issue.generate!(:estimated_hours => 3.6)
     child1 = Issue.generate!(:estimated_hours => 5.0, :parent_issue_id => parent.id, :done_ratio => 90)
     child2 = Issue.generate!(:estimated_hours => 9.0, :parent_issue_id => parent.id)
 
     # Force parent to reload so the data from the children is incorporated.
     parent.reload
+	
+	firstDay = Date::new(2013, 5, 25)
+    lastDay = Date::new(2013, 6, 4)
 
-    assert_in_delta 0.0, ListUser::getEstimatedTimeForIssue(parent), 1e-4
-    assert_in_delta 0.5, ListUser::getEstimatedTimeForIssue(child1), 1e-4
-    assert_in_delta 9.0, ListUser::getEstimatedTimeForIssue(child2), 1e-4
+    assert_in_delta 0.0, ListUser::getEstimatedTimeForIssueForWorkload(parent, firstDay..lastDay), 1e-4
+    assert_in_delta 0.5, ListUser::getEstimatedTimeForIssueForWorkload(child1, firstDay..lastDay), 1e-4
+    assert_in_delta 9.0, ListUser::getEstimatedTimeForIssueForWorkload(child2, firstDay..lastDay), 1e-4
   end
 
-  test "getEstimatedTimeForIssue works for issue with grandchildren." do
+  test "getEstimatedTimeForIssueForWorkload works for issue with grandchildren." do
     parent = Issue.generate!(:estimated_hours => 4.5)
     child = Issue.generate!(:estimated_hours => 5.0, :parent_issue_id => parent.id)
     grandchild = Issue.generate!(:estimated_hours => 9.0, :parent_issue_id => child.id, :done_ratio => 40)
@@ -626,10 +639,13 @@ class ListUserTest < ActiveSupport::TestCase
     # incorporated.
     parent.reload
     child.reload
+	
+	firstDay = Date::new(2013, 5, 25)
+    lastDay = Date::new(2013, 6, 4)
 
-    assert_in_delta 0.0, ListUser::getEstimatedTimeForIssue(parent), 1e-4
-    assert_in_delta 0.0, ListUser::getEstimatedTimeForIssue(child), 1e-4
-    assert_in_delta 5.4, ListUser::getEstimatedTimeForIssue(grandchild), 1e-4
+    assert_in_delta 0.0, ListUser::getEstimatedTimeForIssueForWorkload(parent, firstDay..lastDay), 1e-4
+    assert_in_delta 0.0, ListUser::getEstimatedTimeForIssueForWorkload(child, firstDay..lastDay), 1e-4
+    assert_in_delta 5.4, ListUser::getEstimatedTimeForIssueForWorkload(grandchild, firstDay..lastDay), 1e-4
   end
 
   test "getLoadClassForHours returns \"none\" for workloads below threshold for low workload" do

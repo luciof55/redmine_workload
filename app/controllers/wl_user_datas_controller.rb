@@ -16,11 +16,12 @@ class WlUserDatasController < ApplicationController
 		data.threshold_lowload_min    = Setting['plugin_redmine_workload']['threshold_lowload_min']
 		data.threshold_normalload_min = Setting['plugin_redmine_workload']['threshold_normalload_min']
 		data.threshold_highload_min   = Setting['plugin_redmine_workload']['threshold_highload_min'] 
+		data.factor   = Setting['plugin_redmine_workload']['factor'] 
 		@wl_user_data = data
 	end
 	
 	def create
-		logger.info "Parameter sind: #{params.inspect}"
+		logger.info "Parameters: #{params.inspect}"
 		if params[:wl_user_data][:user_id]
 			#If data does exist update it
 			aux = WlUserData.where user_id: params[:wl_user_data][:user_id]
@@ -42,6 +43,7 @@ class WlUserDatasController < ApplicationController
 				user_data.threshold_lowload_min = params[:wl_user_data][:threshold_lowload_min]
 				user_data.threshold_normalload_min = params[:wl_user_data][:threshold_normalload_min]
 				user_data.threshold_highload_min = params[:wl_user_data][:threshold_highload_min]
+				user_data.factor   = params[:wl_user_data][:factor]  
 				
 				if user_data.save
 					flash[:notice] = 'Data was successfully saved.'
@@ -123,7 +125,7 @@ class WlUserDatasController < ApplicationController
 	end
   
 	def update
-		logger.info "Parameter sind: #{params.inspect}"
+		logger.info "Parameters: #{params.inspect}"
 		begin
 			user_data = WlUserData.find(params[:id])
 			respond_to do |format|
@@ -131,6 +133,7 @@ class WlUserDatasController < ApplicationController
 				user_data.threshold_lowload_min = params[:wl_user_data][:threshold_lowload_min]
 				user_data.threshold_normalload_min = params[:wl_user_data][:threshold_normalload_min]
 				user_data.threshold_highload_min = params[:wl_user_data][:threshold_highload_min]
+				user_data.factor   = params[:wl_user_data][:factor] 
 				
 				if user_data.save
 					format.html {

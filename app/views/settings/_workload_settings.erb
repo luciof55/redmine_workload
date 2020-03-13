@@ -2,6 +2,17 @@
 # This file provides configuration options for the workload plugin.
 %>
 <fieldset class="box tabular">	
+	<legend><%= l(:workload_settings_projects) %></legend>
+	<p>
+	  <label><%= l(:workload_settings_projects) %></label>
+	  <textarea rows="5" cols="20" required name="settings[projects]">
+	  <%= settings['projects'] %>
+	  </textarea>
+	</p>
+</fieldset>
+
+<fieldset class="box tabular">	
+	
 	<legend><%=  l(:workload_settings_hours) %></legend>
 	
 	<p>

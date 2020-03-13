@@ -23,5 +23,9 @@
 		  <%= form.text_field :threshold_highload_min, disabled: !@is_allowed, :required => true %>
 		  <%= l(:field_default_value)%>: <%= Setting['plugin_redmine_workload']['threshold_highload_min']%>
 		</p>
+		<p>
+		  <label><%= l(:workload_settings_factor) %></label>
+		  <%= form.text_field :factor, disabled: !@is_allowed, :required => true %>
+		</p>
 	</fieldset>
 </div>

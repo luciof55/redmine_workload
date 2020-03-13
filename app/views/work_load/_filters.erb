@@ -5,6 +5,7 @@
 		<%= select_year(@year_from, :prefix => "year", :discard_type => true) %>
 		<%= l(:workload_show_rangeto) %><span>&nbsp;&nbsp;</span><%= text_field_tag 'months', @months, :size => 2 %><span>&nbsp;</span><%= l(:workload_show_months) %>
 		<%= check_box_tag 'exclude_closed', '1', @exclude_closed %> <%= l(:workload_exclude_closed)%>
+		<%= check_box_tag 'for_workload', '1', @for_workload %> <%= l(:workload_for_workload)%>
 		<%= link_to_function l(:button_apply), 'jQuery("#filter_form").submit()', :class => 'apply icon icon-checked' %>
 		<p class="buttons">
 		<span><%= l(:workload_show_filter_help) %></span>

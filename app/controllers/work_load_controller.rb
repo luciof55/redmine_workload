@@ -21,6 +21,12 @@ class WorkLoadController < ApplicationController
 		@exclude_closed = false
 	end
 	
+	if params[:for_workload] && params[:for_workload] == '1'
+		@for_workload = true
+	else
+		@for_workload = false
+	end
+	
 	if params[:show_lower] && params[:show_lower] == '1'
 		@show_lower = true
 	else
@@ -88,7 +94,7 @@ class WorkLoadController < ApplicationController
 
     initalizeUsers(params[:workload] || {})       
     
-    @issuesForWorkload = ListUser::getOpenIssuesForUsers(@usersToDisplay, @exclude_closed)
+    @issuesForWorkload = ListUser::getOpenIssuesForUsers(@usersToDisplay, @exclude_closed, @timeSpanToDisplay)
     @monthsToRender = ListUser::getMonthsInTimespan(@timeSpanToDisplay)
 	
 	case @zoom
@@ -96,17 +102,17 @@ class WorkLoadController < ApplicationController
 			@show_days = true
 			@show_weeks = true
 			@show_months = true
-			@workloadData   = ListUser::getHoursPerUserIssueAndDay(@issuesForWorkload, @timeSpanToDisplay, @today)
+			@workloadData   = ListUser::getHoursPerUserIssueAndDay(@issuesForWorkload, @timeSpanToDisplay, @today, @for_workload)
 		when 3
 			@show_days = false
 			@show_weeks = true
 			@show_months = true
-			@workloadData   = ListUser::getHoursPerUserIssueAndWeek(@issuesForWorkload, @timeSpanToDisplay, @today, @first_day, @last_day)
+			@workloadData   = ListUser::getHoursPerUserIssueAndWeek(@issuesForWorkload, @timeSpanToDisplay, @today, @first_day, @last_day, @for_workload)
 		when 2
 			@show_days = false
 			@show_weeks = false
 			@show_months = true
-			@workloadData   = ListUser::getHoursPerUserIssueAndMonth(@issuesForWorkload, @timeSpanToDisplay, @today, @first_day, @last_day, @monthsToRender)
+			@workloadData   = ListUser::getHoursPerUserIssueAndMonth(@issuesForWorkload, @timeSpanToDisplay, @today, @first_day, @last_day, @monthsToRender, @for_workload)
 	end
 
   end

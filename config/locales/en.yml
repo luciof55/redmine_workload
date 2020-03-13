@@ -43,6 +43,8 @@ en:
   workload_overdue_issues_num: "Number of overdue issues:"
   workload_overdue_issues_hours: "Hours from overdue issues:"
   workload_exclude_closed: "Exclude closed issues"
+  workload_settings_projects: "Projects"
+  workload_for_workload: "Workload"
 
   workload_settings_general_workdays: "Weekly working days"
   workload_settings_general_workdays_explanation: "The following days will be considered as working days when computing the workload:"
@@ -59,6 +61,7 @@ en:
   workload_settings_hours_low_min:              "Low"
   workload_settings_hours_normal_min:           "Normal"
   workload_settings_hours_high_min:             "Overloaded"
+  workload_settings_factor:             "Factor"
   
   workload_settings_holiday_setup:	        "Configure holidays"
   workload_settings_holiday_place: "Place"

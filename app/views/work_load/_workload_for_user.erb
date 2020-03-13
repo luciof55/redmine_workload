@@ -9,7 +9,7 @@
   <tr>
 	<th class="user-description" scope="row" title="<%= l(:workload_trigger_tooltip) %>">
 	  <%= render :partial => 'trigger', :locals => {:trigger_for => "user-#{user.id}"} %>
-	  <%= "#{user.firstname} #{user.lastname}" %>
+	  <%= "#{user.login} " %>
 	  <% if data[:overdue_number] > 0 %>
 		<dl class="additional-user-info user-<%= user.id %>-open user-<%= user.id %>-close">
 		  <dt><%= l(:workload_overdue_issues_num) %></dt>

@@ -3,14 +3,15 @@ class WlNationalHolidayController < ApplicationController
   require 'json'
  
   before_action :check_edit_rights, only: [:edit, :update, :create, :destroy]
-  before_action :select_year 
+  before_action :select_year, :select_month 
   before_action :load_places, :load_half_day_options, only: [:index, :new, :edit, :update, :create]
   
   helper :work_load
   
   def index            
-    filter_year_start=Date.new(@this_year,01,01)
-    filter_year_end=Date.new(@this_year,12,31)
+    filter_year_start=Date.new(@this_year, @this_month, 1)
+    filter_year_end  = (filter_year_start >> 1) - 1
+	
     @wl_national_holiday = WlNationalHoliday.where("start_holliday between ? AND ?", filter_year_start, filter_year_end)
     @is_allowed = User.current.allowed_to_globally?(:edit_national_holiday)
   end
@@ -114,5 +115,14 @@ private
     else 
       @this_year=Date.today.strftime("%Y").to_i if @this_year.blank?
     end
+ end
+
+  def select_month
+   if (params[:month]) && params[:month].to_i > 0 && params[:month].to_i < 13
+      @this_month=params[:month].to_i
+    else 
+      @this_month=Date.today.strftime("%m").to_i if @this_month.blank?
+    end
+	logger.info "Month: #{@this_month}"
  end 
 end

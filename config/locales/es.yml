@@ -42,6 +42,8 @@ es:
   workload_overdue_issues_num: "Número de peticiones atrasadas:"
   workload_overdue_issues_hours: "Horas de peticiones atrasadas:"
   workload_exclude_closed: "Excluir issues cerrados"
+  workload_settings_projects: "Proyectos"
+  workload_for_workload: "Workload"
 
   workload_settings_general_workdays: "Días laborables"
   workload_settings_general_workdays_explanation: "Los siguientes días serán tomados como laborables:"
@@ -58,6 +60,7 @@ es:
   workload_settings_hours_low_min:              "Baja"
   workload_settings_hours_normal_min:           "Normal"
   workload_settings_hours_high_min:             "Sobrecargado"
+  workload_settings_factor:             "Factor"
   
   workload_settings_holiday_setup:	        "Configurar feriados"
   workload_settings_holiday_place: "Sede"

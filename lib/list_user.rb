@@ -2,35 +2,70 @@
 class ListUser
 
   require 'dateTools'
+  
+  def self.getProgress(issue, timeSpan)
+	
+	journalDatails = JournalDetail.joins(:journal).where({ journals: { journalized_id: issue.id}}).where({ journals: { journalized_type: "Issue"}}).where(property: "attr").where(prop_key: "done_ratio").where({ journals: { created_on: timeSpan}}).merge(Journal.order(:id))
+	
+	#Journal.joins(:details).where(journalized_id: issue.id).where(journalized_type: "Issue").where(journalized_type: 'Issue').where({ journal_details: { property: "attr" }}).where({ journal_details: { prop_key: "done_ratio" }}).where(created_on: timeSpan).order(:id)
+	
+	done_ratio = 0
+	if (journalDatails.length > 0)
+		initial = journalDatails[0].old_value
+		final = journalDatails[journalDatails.length-1].value
+		done_ratio = final.to_f - initial.to_f
+		Rails.logger.info("Done ratio: " + done_ratio.to_s)
+		if (done_ratio < 0)
+			done_ratio = 0
+		end
+	else
+		Rails.logger.info("No journals find!")
+	end
+	
+	return done_ratio
+	
+  end
 
-  def self.getEstimatedTimeForIssue(issue)
+  def self.getEstimatedTimeForIssue(issue, timeSpan)
     raise ArgumentError unless issue.kind_of?(Issue)
 
     return 0.0 if issue.estimated_hours.nil?
     return 0.0 if issue.children.any?
 
-    #return issue.estimated_hours*((100.0 - issue.done_ratio)/100.0)
-	return issue.estimated_hours
+	done_ratio = ListUser::getProgress(issue, timeSpan)
+	
+    return issue.estimated_hours * (done_ratio/100.00)
+	#return issue.estimated_hours
+  end
+  
+  def self.getEstimatedTimeForIssueForWorkload(issue, timeSpan)
+    raise ArgumentError unless issue.kind_of?(Issue)
+
+    return 0.0 if issue.estimated_hours.nil?
+    return 0.0 if issue.children.any?
+	
+    return issue.estimated_hours
   end
 
   # Returns all issues that fulfill the following conditions:
   #  * They are open
   #  * The project they belong to is active
-  def self.getOpenIssuesForUsers(users, exclude_closed)
+  def self.getOpenIssuesForUsers(users, exclude_closed, timeSpan)
     raise ArgumentError unless users.kind_of?(Array)
     userIDs = users.map(&:id)
 
     issue = Issue.arel_table
     project = Project.arel_table
     issue_status = IssueStatus.arel_table
+	
+	projectsId = Setting['plugin_redmine_workload']['projects'].split(",")
 
-    
     if exclude_closed
 		# Fetch only open issues 
-		issues = Issue.joins(:project).joins(:status).joins(:assigned_to).where(issue[:assigned_to_id].in(userIDs)).where(project[:status].eq(1)).where(issue_status[:is_closed].eq(false))       
+		issues = Issue.joins(:project).joins(:status).joins(:assigned_to).where(issue[:assigned_to_id].in(userIDs)).where(project[:id].in(projectsId)).where(issue_status[:is_closed].eq(false)).where("start_date between ? and ? or due_date between ? and ?", timeSpan.first, timeSpan.last, timeSpan.first, timeSpan.last)
 	else
 		# Fetch all issues
-		issues = Issue.joins(:project).joins(:assigned_to).where(issue[:assigned_to_id].in(userIDs)).where(project[:status].eq(1))
+		issues = Issue.joins(:project).joins(:assigned_to).where(issue[:assigned_to_id].in(userIDs)).where(project[:id].in(projectsId)).where("start_date between ? and ? or due_date between ? and ?", timeSpan.first, timeSpan.last, timeSpan.first, timeSpan.last) 
 	end
     #  Filter out all issues that have children; They do not *directly* add to
     # the workload
@@ -53,13 +88,19 @@ class ListUser
   #   * :holiday - true if this is a holiday, false otherwise.
   #
   # If the given time span is empty, an empty hash is returned.
-  def self.getHoursForIssuesPerDay(issue, timeSpan, today)
+  def self.getHoursForIssuesPerDay(issue, timeSpan, today, workload)
+  
+	Rails.logger.info("issue: " + issue.id.to_s + "star******************************************************")
 
     raise ArgumentError unless issue.kind_of?(Issue)
     raise ArgumentError unless timeSpan.kind_of?(Range)
     raise ArgumentError unless today.kind_of?(Date)
 
-    hoursRemaining = ListUser::getEstimatedTimeForIssue(issue)
+	if (workload)
+		hoursRemaining = ListUser::getEstimatedTimeForIssueForWorkload(issue, timeSpan)
+	else
+	    hoursRemaining = ListUser::getEstimatedTimeForIssue(issue, timeSpan)
+	end
     issue.assigned_to.nil? ? assignee = 'all' : assignee = issue.assigned_to
     workingDays = DateTools::getWorkingDaysInTimespan(timeSpan, assignee)    
 	
@@ -85,12 +126,14 @@ class ListUser
 			end
 		end
 	end
+	
+	Rails.logger.info("issue: " + issue.id.to_s + "******************************************************end")
 
     return result
   end
   
-  def self.getHoursForIssuesPerWeek(issue, timeSpan, today, first_day, last_day)
-	hoursForIssuesPerDay = getHoursForIssuesPerDay(issue, timeSpan, today)
+  def self.getHoursForIssuesPerWeek(issue, timeSpan, today, first_day, last_day, workload)
+	hoursForIssuesPerDay = getHoursForIssuesPerDay(issue, timeSpan, today, workload)
 	week_start = first_day
 	week_end = first_day + (7 - first_day.cwday)
 	result = Hash::new
@@ -111,8 +154,8 @@ class ListUser
 	return result
   end
   
-  def self.getHoursForIssuesPerMonth(issue, timeSpan, today, first_day, last_day, monthsToRender)
-	hoursForIssuesPerDay = getHoursForIssuesPerDay(issue, timeSpan, today)
+  def self.getHoursForIssuesPerMonth(issue, timeSpan, today, first_day, last_day, monthsToRender, workload)
+	hoursForIssuesPerDay = getHoursForIssuesPerDay(issue, timeSpan, today, workload)
 	result = Hash::new
 	
 	monthsToRender.each do |month|
@@ -140,7 +183,7 @@ class ListUser
 	#								currently logged in user.
 	#´* :total.     Returns a summary of all issues for the user that this hash is
 	#								for.
-  def self.getHoursPerUserIssueAndDay(issues, timeSpan, today)
+  def self.getHoursPerUserIssueAndDay(issues, timeSpan, today, workload)
     raise ArgumentError unless issues.kind_of?(Array)
     raise ArgumentError unless timeSpan.kind_of?(Range)
     raise ArgumentError unless today.kind_of?(Date)
@@ -157,7 +200,7 @@ class ListUser
 			end
 		end
 			
-		hoursForIssue = getHoursForIssuesPerDay(issue, timeSpan, today)
+		hoursForIssue = getHoursForIssuesPerDay(issue, timeSpan, today, workload)
 		result[assignee][:total] = addIssueInfoToSummary(result[assignee][:total], hoursForIssue, timeSpan)
     end
 	
@@ -237,7 +280,7 @@ class ListUser
     return result
   end
   
-	def self.getHoursPerUserIssueAndMonth(issues, timeSpan, today, first_day, last_day, monthsToRender)
+	def self.getHoursPerUserIssueAndMonth(issues, timeSpan, today, first_day, last_day, monthsToRender, workload)
 		raise ArgumentError unless issues.kind_of?(Array)
 		raise ArgumentError unless timeSpan.kind_of?(Range)
 		raise ArgumentError unless today.kind_of?(Date)
@@ -253,7 +296,7 @@ class ListUser
 				end
 			end
 				
-			hoursForIssue = getHoursForIssuesPerMonth(issue, timeSpan, today, first_day, last_day, monthsToRender)
+			hoursForIssue = getHoursForIssuesPerMonth(issue, timeSpan, today, first_day, last_day, monthsToRender, workload)
 			hoursForIssue.keys.each do |monthKey|
 				result[assignee][:total][monthKey][:hours] += hoursForIssue[monthKey][:hours]
 			end
